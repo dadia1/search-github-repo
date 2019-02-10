@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+        crossorigin="anonymous">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+        integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
+        crossorigin="anonymous">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        var repos = [];
+        $(function () {
+            $('#btnSearch').click(function () {
+                var val = $('#txtSearch').val();
+                $.ajax({
+                    url: 'https://api.github.com/search/repositories?q=' + val,
+                    type: "GET",
+                    data: {},
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (result) {
+                        repos = result.items;
+                        var str = '';
+                        repos.forEach(function (i) {
+                            str += '<div class="text-center gallery_product col-lg-4 col-md-4 col-sm-4 col-xs-6 filter hdpe" style="margin-bottom:10px;">'
+                                + '<img style="height:200px; width:200px; margin:auto" src="' + i.owner.avatar_url + '" class="img-responsive">'
+                                + '<h4 style="margin:10px 0">' + i.name + '</h4>'
+                                + '<button class="btnBookmark btn btn-success form-control" repo="' + i.id + '">Add</button>'
+                                + '</div>';
+                        });
+
+                        $('.content').append(str);
+                    }
+                });
+
+            });
+
+            $('body').on('click', '.btnBookmark', function () {
+                var repoId = $(this).attr('repo');
+                var founded = repos.find(function (r) {
+                    return r.id == repoId;
+                });
+                if (founded) {
+                    $.ajax({
+                        url: './WebService.asmx/AddRepo',
+                        type: "POST",
+                        data: JSON.stringify({ repo: founded }),
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (result) {
+                            alert('success');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">Github test</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="./index.htm">Home</a></li>
+      <li><a href="./Bookmarks.htm">Bookmarks</a></li>
+      
+    </ul>
+  </div>
+</nav>
+    <div class="container">
+        <div class="input-group">
+            <input type="text" id="txtSearch" class="form-control" placeholder="Search for...">
+            <span class="input-group-btn">
+                <button class="btn btn-default" id="btnSearch" type="button">
+                    Go!</button>
+            </span>
+        </div>
+        <div class="content">
+        </div>
+        <!-- /input-group -->
+    </div>
+</body>
+</html>
